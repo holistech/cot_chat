@@ -1,5 +1,6 @@
 from pprint import pprint
-
+import pyperclip
+import datetime
 import streamlit as st
 import yaml
 from litellm import completion
@@ -144,8 +145,21 @@ def run_streamlit_app():
     first_agent, second_agent, third_agent = st.session_state.agent_graph.agents
 
     # Max history setting
-    max_history = st.sidebar.slider("Max Chat History Entries", min_value=1, max_value=20, value=5)
+    max_history = st.sidebar.slider("Max Chat History Entries", min_value=1, max_value=40, value=10)
 
+    # Copy conversation to clipboard
+    if st.sidebar.button("Copy Conversation to Clipboard"):
+        conversation = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.messages])
+        pyperclip.copy(conversation)
+        st.sidebar.success("Conversation copied to clipboard!")
+
+    # Save conversation to file
+    default_filename = f"conversation_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    if st.sidebar.button("Save Conversation to File"):
+        conversation = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.messages])
+        with open(default_filename, "w", encoding="utf-8") as f:
+            f.write(conversation)
+        st.sidebar.success(f"Conversation saved to {default_filename}")
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
