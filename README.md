@@ -1,32 +1,27 @@
-# cot_chat
+# Chain of Thought Chat
 
-Please create a streamlit litellm chat application that implements a three agent Chain Of Thought chat application.
+This is a demonstration of a Chain of Thought (CoT) chat application that employs three agents to apply the CoT paradigm within a Streamlit interface. It is based on the Mixture of Specialized Agent Graphs (MosAG) approach from Holistech, which is designed to implement advanced agent graphs for deep knowledge retrieval and research.
 
-Use litellm to create the llm calls.
-Use streamlit as chat interface
-Use the provided pydantic LLMAgentGraphModel and LLMAgentModel to specify the LLM agents.
+## Agents
+The application utilizes three agents to implement the CoT methodology:
 
-Three agents of type LLMAgentModel must be used to implement the chain of thought approach.
+1. **Initial Chain of Thought reasoning agent**: This agent analyzes the user’s question and suggests an initial solution.
+2. **Iterative CoT agent**: This agent iteratively refines the first agent's solution until either a satisfactory conclusion is reached or the maximum number of iterations has been performed.
+3. **CoT aggregator and explainer**: This agent consolidates the entire conversation and presents the results in a digestible format.
 
-The first agent get the question from the user and creates the first iteration of the thought.
-The user question must be put into the Agent user prompt identified as {user_question}.
+These agents are defined in a YAML configuration file, which includes the required language models, system prompts, and user prompts.
 
-The second agent must be run in a loop. Hence, it will get the user question and the output of the first agent as input.
-The output of the second agent will be append to the output of the first agent and will be input of the second agent again,
-until the break criteria is reached or the number of iterations was reached. The break criteria is when the second agent puts the
-string <final>Confirmed</final> into the output.
+## Installation
 
-The last agent gets the full output (first agent and all appended outputs of the second agent) as input to consolidate
-the conclusion.
+1. Create a virtual Python environment and install all required dependencies using `pip`:
 
-The output of all agents must be streamed into the streamlit chat window, so that the user can follow the chain of thought
-in realtime.
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-The GUI:
-Create a streamlit chat interface that provides a user input window and a chat window that shows the history of
-the chat shows the output of the agents in realtime. Implement a side bar in which the agent names are present and an interface to load a new
-YAML BASED AGENT DEFINITION as new agents.
+2. Create a `.env` file and store your API keys, allowing you to use different language models for testing the CoT approach.
+3. Run the Streamlit application, open your browser, and start exploring the CoT approach:
 
-Hence, agent definition from YAML must be loaded and used for LLM inference.
-
-Please analyse the requirements above and implement them step by step.
+    ```bash
+    streamlit run chat.py
+    ```
