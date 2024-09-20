@@ -77,10 +77,10 @@ def llm_call(agent: LLMAgentModel, messages: List[Dict[str, str]], max_history: 
 
 # Chain of Thought function
 def chain_of_thought(agent_graph: LLMAgentGraphModel, user_question: str, chat_history: List[Dict[str, str]],
-                     max_history: int):
-    first_agent, second_agent, third_agent = agent_graph.agents
+                     max_history: int, max_iterations: int):
+    first_agent, second_agent, third_agent, fourth_agent = agent_graph.agents
 
-    # First agent
+    # First agent (unchanged)
     first_response = ""
     yield f"### First Agent ({first_agent.name}):\n\n"
     for chunk in llm_call(first_agent, chat_history, max_history):
@@ -90,47 +90,60 @@ def chain_of_thought(agent_graph: LLMAgentGraphModel, user_question: str, chat_h
             first_response += content
             yield content
 
-    # Second agent (loop)
-    second_response = first_response
+    # Second and Third agents (loop)
+    loop_response = first_response
 
-    yield f"\n\n### Second Agent ({second_agent.name}):\n\n"
-    for i in range(second_agent.max_cot_iterations):
-        iteration_response = ""
-        second_input = second_agent.user_prompt.format(user_request=user_question, previous_answer=second_response)
+    yield f"\n\n### Entering reasoning loop:\n\n"
+    for i in range(max_iterations):
+        # Second agent
+        second_input = second_agent.user_prompt.format(user_request=user_question, previous_answer=loop_response)
         second_agent_messages = chat_history + [
             {"role": "assistant", "content": first_response},
             {"role": "user", "content": second_input}
         ]
-        yield f"\n\n#### Iteration {i}:\n\n"
+        yield f"\n\n### Iteration {i + 1}\n"
+        yield f"\n\n#### Agent {second_agent.name}:\n\n"
         for chunk in llm_call(second_agent, second_agent_messages, max_history):
             content = chunk.choices[0].delta.content
             content = content.replace(">", ">\n")
-            iteration_response += content
+            loop_response += content
             yield content
 
-        second_response += "\n" + iteration_response
+        # Third agent (new)
+        third_input = third_agent.user_prompt.format(user_request=user_question,
+                                                     previous_answer=loop_response)
+        third_agent_messages = chat_history + [
+            {"role": "assistant", "content": first_response},
+            {"role": "user", "content": third_input}
+        ]
+        yield f"\n\n#### Agent {third_agent.name}:\n\n"
+        for chunk in llm_call(third_agent, third_agent_messages, max_history):
+            content = chunk.choices[0].delta.content
+            content = content.replace(">", ">\n")
+            loop_response += content
+            yield content
 
-        if "<final>Complete</final>".lower() in iteration_response.lower().replace(" ", "").replace("\n", ""):
+
+        if "<final>Complete</final>".lower() in loop_response.lower().replace(" ", "").replace("\n", ""):
             break
 
-    # Third agent
-    third_response = ""
-    third_input = first_agent.user_prompt.format(user_request=user_question, previous_answer=second_response)
-    third_agent_messages = chat_history + [
-        {"role": "assistant", "content": third_input},
-        {"role": "user", "content": second_response},
+    fourth_response = ""
+    fourth_input = fourth_agent.user_prompt.format(user_request=user_question, previous_answer=loop_response)
+    fourth_agent_messages = chat_history + [
+        {"role": "assistant", "content": first_response},
+        {"role": "user", "content": fourth_input},
     ]
 
-    yield f"\n\n### Third Agent ({third_agent.name}):\n\n"
-    for chunk in llm_call(third_agent, third_agent_messages, max_history):
+    yield f"\n\n### Fourth Agent ({fourth_agent.name}):\n\n"
+    for chunk in llm_call(fourth_agent, fourth_agent_messages, max_history):
         content = chunk.choices[0].delta.content
         content = content.replace(">", ">\n")
-        third_response += content
+        fourth_response += content
         yield content
 
 
 def run_streamlit_app():
-    st.title("Chain of Thought Chat Application")
+    st.title("Agent Chat")
 
     # YAML file uploader
     uploaded_file = st.sidebar.file_uploader("Load new agent definitions", type="yaml")
@@ -142,10 +155,13 @@ def run_streamlit_app():
     st.sidebar.title("Agents")
     for agent in st.session_state.agent_graph.agents:
         st.sidebar.write(f"- {agent.name}")
-    first_agent, second_agent, third_agent = st.session_state.agent_graph.agents
+    first_agent, second_agent, third_agent, fourth_agent = st.session_state.agent_graph.agents
 
     # Max history setting
     max_history = st.sidebar.slider("Max Chat History Entries", min_value=1, max_value=40, value=10)
+
+    # New: Max iterations setting
+    max_iterations = st.sidebar.slider("Max Iterations", min_value=1, max_value=20, value=5)
 
     # Copy conversation to clipboard
     if st.sidebar.button("Copy Conversation to Clipboard"):
@@ -181,7 +197,7 @@ def run_streamlit_app():
             response_placeholder = st.empty()
             full_response = ""
             for response in chain_of_thought(st.session_state.agent_graph, prompt, st.session_state.messages,
-                                             max_history):
+                                             max_history, max_iterations):
                 full_response += response
                 response_placeholder.markdown(full_response)
 
