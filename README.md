@@ -36,4 +36,22 @@ These agents are specified in a YAML configuration file, which includes the nece
     streamlit run chat.py
     ```
 
+# Example application postgresql based job schedular
 
+Please provide a solution for the following requirements:
+
+I need a comprehensive Python solution to implement a job scheduler using the postgresql pub/sub system. 
+The job scheduler must run, stop, remove and cancel docker container that uses images from a docker image repository. 
+Only postgresql, Python and docker should be used for the implementation. Do not use Redis or celery!
+A REST interface must be designed, so that job can be startet, cancelled/stopped, paused and resumed. 
+It is important that the REST API must be asynchronous. 
+Hence additional endpoints are required to get the current log of the docker container so that a client can track the progress of a computation within a docker container.
+Use FastAPI for the REST interface.
+
+Tools to use:
+- Python
+- postgresql
+- docker
+- FastAPI
+
+Use different file for postgresql approach, REST interface

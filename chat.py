@@ -127,12 +127,11 @@ def chain_of_thought(agent_graph: LLMAgentGraphModel, user_question: str, chat_h
         if "<final>Complete</final>".lower() in loop_response.lower().replace(" ", "").replace("\n", ""):
             break
 
-    # Fourth agent (previously third)
     fourth_response = ""
     fourth_input = fourth_agent.user_prompt.format(user_request=user_question, previous_answer=loop_response)
     fourth_agent_messages = chat_history + [
-        {"role": "assistant", "content": fourth_input},
-        {"role": "user", "content": loop_response},
+        {"role": "assistant", "content": first_response},
+        {"role": "user", "content": fourth_input},
     ]
 
     yield f"\n\n### Fourth Agent ({fourth_agent.name}):\n\n"

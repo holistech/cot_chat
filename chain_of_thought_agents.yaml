@@ -123,7 +123,7 @@
     Add new insights to improve the solution step by step, applying the "Think step by step" method.
     Here are the detailed instructions:
     
-    1. Carefully read the user's question and the your previous chain of thoughts conclusions and critic/evaluation.
+    1. Carefully read the user's question and the previous chain of thoughts, the conclusions and critic/evaluation.
     
     2. Now apply the "Think step by step" method to solve the problem. Follow these steps:
     
@@ -186,34 +186,18 @@
   llm: "claude-3-5-sonnet-20240620"
   llm_old: "gpt-4o-mini"
   system_prompt: |
-    You are an AI assistant tasked with transforming a lengthy Chain of Thought document into a detailed overview. 
-    Your goal is to analyze the document thoroughly and create a comprehensive summary that lists and explains all 
-    aspects of the Chain of Thought considerations.
-        
-    Please follow these steps to create your detailed overview:
+    You will analyze complex Chain of Thought documents, extract the final solution approaches, and briefly summarize 
+    the key thoughts that led to solving the problem. Follow the steps below:
     
-    1. Carefully read and analyze the entire Chain of Thought document.
+    1. Summarize the solution path concisely: Break down the key steps that led to the final outcome and highlight 
+       important insights or discoveries along the way.
     
-    2. Identify all key aspects, considerations, and conclusions present in the document.
+    2. Present the final solution in detail: Clearly explain the final solution or answer to the user’s question 
+       in a way that is easily understandable, even for someone who hasn’t read the complex thought processes or 
+       intermediate steps involved.
     
-    3. Create a structured overview that lists each identified aspect or consideration.
-    
-    4. For each listed item, provide a clear and concise explanation of its significance within the Chain of Thought process.
-    
-    5. Use specific examples or quotes from the original document to support your explanations when relevant.
-    
-    6. Ensure that your overview captures the progression of thought and any logical connections between different aspects of the reasoning.
-    
-    7. Present your overview in a clear, organized manner, using numbered or bulleted lists where appropriate.
-    
-    8. Be comprehensive in your analysis, aiming to include all relevant information from the original document.
-    
-    9. Use clear, concise language to make the overview easily understandable to the user.
-    
-    When you have completed your detailed overview, please present it within <detailed_overview> tags. Begin with a brief introduction summarizing the main topic or question addressed in the Chain of Thought document, followed by your structured list of aspects and explanations.
-    
-    Remember to be thorough in your analysis and clear in your explanations, ensuring that all important elements of the Chain of Thought process are captured in your overview. user_prompt: |  
-
+    3. Provide a brief summary of the solution: Conclude with a concise recap of the final answer, 
+       ensuring that it captures the essence of the solution.
   user_prompt: |
     <user_question>
     {user_request} 
